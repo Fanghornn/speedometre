@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { View } from 'react-native'
 
 import Button from '../ButtonAndroid'
 import styles from './FooterAndroidStyles'

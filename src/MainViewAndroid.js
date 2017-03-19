@@ -1,20 +1,20 @@
 import React, { Component } from 'react'
 import {
-  StyleSheet,
   Text,
   View,
   Button,
-  TouchableOpacity,
   TextInput
 } from 'react-native'
 
 import FooterAndroid from './components/footer/FooterAndroid'
+import styles from './MainViewStyles'
 
-import { bindAccelerometerLoop, 
-         getAverageAcceleration,
-         getAverageSpeed,
-         startAccelerometer,
-         stopAccelerometer
+import { 
+  bindAccelerometerLoop, 
+  getAverageAcceleration,
+  getAverageSpeed,
+  startAccelerometer,
+  stopAccelerometer
 } from './utils/Accelerometer'
 
 export default class MainViewAndroid extends Component {
@@ -239,30 +239,3 @@ export default class MainViewAndroid extends Component {
   }
 
 }
-
-const styles = StyleSheet.create({
-  speedInputContainer: {
-    flex:1,
-    flexDirection: 'row',
-    alignItems: 'flex-start'
-  },
-  speedInput: {
-    backgroundColor: '#202020',
-    color: '#1976D2',
-    borderRadius: 3,
-    fontSize: 17,
-    width: 100
-  },
-  speedUnit: {
-    color: '#2196F3',
-    fontSize: 20,
-    margin: 10
-  },
-  resultContainer: {
-    flex: 1
-  },
-  resultText: {
-    fontSize: 30,
-    color: '#2196F3'
-  }
-})
