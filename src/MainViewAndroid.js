@@ -39,12 +39,8 @@ export default class MainViewAndroid extends Component {
   shouldComponentUpdate(_, nextState) {
     const { ellapsedMilliseconds, active, accelerationHasBegun } = nextState
 
-    if (active && accelerationHasBegun) {
-      if (ellapsedMilliseconds % 100 === 0) {
-        return true
-      } else {
-        return false
-      }
+    if (active && accelerationHasBegun && ellapsedMilliseconds % 100 !== 0) {
+      return false
     }
 
     return true
@@ -61,7 +57,7 @@ export default class MainViewAndroid extends Component {
 
   readAcceleration = (acceleration) => {
 
-    const { accelerationHasBegun, accelerationSamples, ellapsedMilliseconds, speedToReach } = this.state
+    const { accelerationHasBegun, accelerationSamples, ellapsedMilliseconds } = this.state
 
     if (!accelerationHasBegun && !accelerationSamples) {
 
@@ -71,52 +67,57 @@ export default class MainViewAndroid extends Component {
       })
 
     } else {
+      this.computeCurrentSpeed()
+    }
+  }
 
-      const newAccelerationSamples = accelerationSamples.length === 30
-        ? [...accelerationSamples.slice(1), acceleration]
-        : [...accelerationSamples, acceleration]
+  computeCurrentSpeed = () => {
+    const { speedToReach, accelerationHasBegun, accelerationSamples, ellapsedMilliseconds } = this.state
 
-      const currentEllapsedMilliseconds = ellapsedMilliseconds + 10 
+    const newAccelerationSamples = accelerationSamples.length === 30
+      ? [...accelerationSamples.slice(1), acceleration]
+      : [...accelerationSamples, acceleration]
 
-      const averageAcceleration = getAverageAcceleration(newAccelerationSamples)
+    const currentEllapsedMilliseconds = ellapsedMilliseconds + 10 
 
-      if (!accelerationHasBegun) {
+    const averageAcceleration = getAverageAcceleration(newAccelerationSamples)
 
-        const didAccelerationBegun = (averageAcceleration > 0.6)
+    if (!accelerationHasBegun) {
 
-        const newEllapsedMilliseconds = didAccelerationBegun
-          ? 0
-          : currentEllapsedMilliseconds
+      const didAccelerationBegun = (averageAcceleration > 0.6)
+
+      const newEllapsedMilliseconds = didAccelerationBegun
+        ? 0
+        : currentEllapsedMilliseconds
+
+      this.setState({
+        ellapsedMilliseconds: newEllapsedMilliseconds,
+        accelerationHasBegun: didAccelerationBegun,
+        accelerationSamples: newAccelerationSamples
+      })
+
+    } else {
+      
+      const averageSpeed = getAverageSpeed(averageAcceleration, currentEllapsedMilliseconds)
+
+      if (averageSpeed > speedToReach) {
+
+        stopAccelerometer();
 
         this.setState({
-          ellapsedMilliseconds: newEllapsedMilliseconds,
-          accelerationHasBegun: didAccelerationBegun,
-          accelerationSamples: newAccelerationSamples
+          active: false,
+          accelerationHasBegun: false,
+          accelerationSamples: null,
+          ellapsedMilliseconds: currentEllapsedMilliseconds,
+          result: averageSpeed
         })
 
       } else {
-        
-        const averageSpeed = getAverageSpeed(averageAcceleration, currentEllapsedMilliseconds)
 
-        if (averageSpeed > speedToReach) {
-
-          stopAccelerometer();
-
-          this.setState({
-            active: false,
-            accelerationHasBegun: false,
-            accelerationSamples: null,
-            ellapsedMilliseconds: currentEllapsedMilliseconds,
-            result: averageSpeed
-          })
-
-        } else {
-
-          this.setState({
-            ellapsedMilliseconds: currentEllapsedMilliseconds,
-            accelerationSamples: newAccelerationSamples
-          })
-        }
+        this.setState({
+          ellapsedMilliseconds: currentEllapsedMilliseconds,
+          accelerationSamples: newAccelerationSamples
+        })
       }
     }
   }
